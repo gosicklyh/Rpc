@@ -19,6 +19,15 @@ std::string formatString(const char *str, Args &&...args) {
   return result;
 }
 
+#define DEBUGLOG(str, ...)                                                     \
+  {                                                                            \
+    std::string msg =                                                          \
+        (new rocket::LogEvent(rocket::LogLevel::Debug))->toString() +          \
+        rocket::formatString(str, ##__VA_ARGS__);                              \
+    rocket::Logger::GetGlobalLogger()->pushLog(msg);                           \
+    rocket::Logger::GetGlobalLogger()->log();                                  \
+  }
+
 enum LogLevel { Debug = 1, Info = 2, Error = 3 };
 
 class Logger {

@@ -4,18 +4,11 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#define DEBUGLOG(str, ...)                                                     \
-  std::string msg =                                                            \
-      new rocket::LogEvent(rocket::LogLevel::Debug)->toString() +              \
-      rocket::formatString(str, ##__VA_ARGS__);                                \
-  rocket::g_logger->pushLog(msg);                                              \
-  rocket::g_logger->log();
-
 namespace rocket {
-static Logger *g_logger = new Logger();
+static Logger *g_logger = NULL;
 
 Logger *Logger::GetGlobalLogger() {
-  if (!g_logger) {
+  if (g_logger) {
     return g_logger;
   }
   return new Logger();
@@ -56,15 +49,18 @@ std::string LogEvent::toString() {
 
   ss << "[" << LogLevelToString(m_level) << "]\t"
      << "[" << time_str << "]\t"
-     << "[" << m_pid << ":" << m_thread_id << "]\t";
+     << "[" << std::string(__FILE__) << ":" << __LINE__ << "]\t";
+
+  return ss.str();
 }
 
 void Logger::pushLog(const std::string &msg) { m_buffer.push(msg); }
+
 void Logger::log() {
   while (!m_buffer.empty()) {
     std::string msg = m_buffer.front();
     m_buffer.pop();
-    printf(msg.c_str());
+    printf("%s", msg.c_str());
   }
 }
 

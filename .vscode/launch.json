@@ -1,0 +1,33 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "调试 test_log",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/rocket/bin/test_log", // ServerApp 可执行文件路径
+      "args": [], // 如果需要，添加命令行参数
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "启用 GDB 的 pretty-printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build",
+      "miDebuggerPath": "/usr/bin/gdb", // GDB 的路径
+      "logging": {
+        "engineLogging": false
+      },
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+  ]
+}

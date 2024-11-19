@@ -18,6 +18,7 @@
   std::string name##_str = std::string(name##_node->GetText());
 
 namespace rocket {
+
 static Config *g_config = NULL;
 
 Config *Config::GetGlobalConfig() { return g_config; }
@@ -29,18 +30,22 @@ void Config::SetGlobalConfig(const char *xmlfile) {
 }
 
 Config::Config(const char *xmlfile) {
-  TiXmlDocument *xml_document = new TiXmlDocument;
+  TiXmlDocument *xml_document = new TiXmlDocument();
+
   bool rt = xml_document->LoadFile(xmlfile);
   if (!rt) {
-    printf("Start rocket server error, failed to read config file %s\n",
-           xmlfile);
+    printf("Start rocket server error, failed to read config file %s, error "
+           "info[%s] \n",
+           xmlfile, xml_document->ErrorDesc());
     exit(0);
   }
 
   READ_XML_NODE(root, xml_document);
   READ_XML_NODE(log, root_node);
-  READ_STR_FROM_XML_NODE(log_level, log_node)
+
+  READ_STR_FROM_XML_NODE(log_level, log_node);
 
   m_log_level = log_level_str;
 }
+
 } // namespace rocket

@@ -1,8 +1,6 @@
 #include "log.h"
 #include "config.h"
-#include "mutex.h"
 #include "util.h"
-#include <queue>
 #include <sstream>
 #include <stdio.h>
 #include <sys/time.h>
@@ -13,9 +11,11 @@ static Logger *g_logger = NULL;
 
 Logger *Logger::GetGlobalLogger() { return g_logger; }
 
-void Logger::InitGlobalConfig() {
+void Logger::InitGlobalLogger() {
+
   LogLevel global_log_level =
       StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
+  printf("Init log level [%s]\n", LogLevelToString(global_log_level).c_str());
   g_logger = new Logger(global_log_level);
 }
 
@@ -23,8 +23,10 @@ std::string LogLevelToString(LogLevel level) {
   switch (level) {
   case Debug:
     return "DEBUG";
+
   case Info:
     return "INFO";
+
   case Error:
     return "ERROR";
   default:
@@ -55,7 +57,6 @@ std::string LogEvent::toString() {
   char buf[128];
   strftime(&buf[0], 128, "%y-%m-%d %H:%M:%S", &now_time_t);
   std::string time_str(buf);
-
   int ms = now_time.tv_usec / 1000;
   time_str = time_str + "." + std::to_string(ms);
 
@@ -72,15 +73,17 @@ std::string LogEvent::toString() {
 }
 
 void Logger::pushLog(const std::string &msg) {
-  ScopeMutex<Mutex> lock(m_mutex);
+  ScopeMutext<Mutex> lock(m_mutex);
   m_buffer.push(msg);
   lock.unlock();
 }
 
 void Logger::log() {
-  ScopeMutex<Mutex> lock(m_mutex);
-  std::queue<std::string> tmp = m_buffer;
+
+  ScopeMutext<Mutex> lock(m_mutex);
+  std::queue<std::string> tmp;
   m_buffer.swap(tmp);
+
   lock.unlock();
 
   while (!tmp.empty()) {

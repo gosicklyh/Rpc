@@ -1,23 +1,24 @@
 #ifndef ROCKET_COMMON_LOG_H
 #define ROCKET_COMMON_LOG_H
 
-#include "config.h"
-#include "mutex.h"
-#include <cstdio>
 #include <memory>
 #include <queue>
 #include <string>
+
+#include "config.h"
+#include "mutex.h"
+
 namespace rocket {
 
 template <typename... Args>
 std::string formatString(const char *str, Args &&...args) {
+
   int size = snprintf(nullptr, 0, str, args...);
 
   std::string result;
   if (size > 0) {
     result.resize(size);
     snprintf(&result[0], size + 1, str, args...);
-    // printf("%s", result.c_str());
   }
 
   return result;
@@ -26,7 +27,7 @@ std::string formatString(const char *str, Args &&...args) {
 #define DEBUGLOG(str, ...)                                                     \
   if (rocket::Logger::GetGlobalLogger()->getLogLevel() <= rocket::Debug) {     \
     rocket::Logger::GetGlobalLogger()->pushLog(                                \
-        rocket::LogEvent(rocket::LogLevel::Debug).toString() + "[" +           \
+        (new rocket::LogEvent(rocket::LogLevel::Debug))->toString() + "[" +    \
         std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]\t" +       \
         rocket::formatString(str, ##__VA_ARGS__) + "\n");                      \
     rocket::Logger::GetGlobalLogger()->log();                                  \
@@ -35,7 +36,7 @@ std::string formatString(const char *str, Args &&...args) {
 #define INFOLOG(str, ...)                                                      \
   if (rocket::Logger::GetGlobalLogger()->getLogLevel() <= rocket::Info) {      \
     rocket::Logger::GetGlobalLogger()->pushLog(                                \
-        rocket::LogEvent(rocket::LogLevel::Info).toString() + "[" +            \
+        (new rocket::LogEvent(rocket::LogLevel::Info))->toString() + "[" +     \
         std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]\t" +       \
         rocket::formatString(str, ##__VA_ARGS__) + "\n");                      \
     rocket::Logger::GetGlobalLogger()->log();                                  \
@@ -44,7 +45,7 @@ std::string formatString(const char *str, Args &&...args) {
 #define ERRORLOG(str, ...)                                                     \
   if (rocket::Logger::GetGlobalLogger()->getLogLevel() <= rocket::Error) {     \
     rocket::Logger::GetGlobalLogger()->pushLog(                                \
-        rocket::LogEvent(rocket::LogLevel::Error).toString() + "[" +           \
+        (new rocket::LogEvent(rocket::LogLevel::Error))->toString() + "[" +    \
         std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]\t" +       \
         rocket::formatString(str, ##__VA_ARGS__) + "\n");                      \
     rocket::Logger::GetGlobalLogger()->log();                                  \
@@ -56,7 +57,7 @@ class Logger {
 public:
   typedef std::shared_ptr<Logger> s_ptr;
 
-  Logger(LogLevel level) : m_set_level(level){};
+  Logger(LogLevel level) : m_set_level(level) {}
 
   void pushLog(const std::string &msg);
 
@@ -67,7 +68,7 @@ public:
 public:
   static Logger *GetGlobalLogger();
 
-  static void InitGlobalConfig();
+  static void InitGlobalLogger();
 
 private:
   LogLevel m_set_level;
@@ -77,11 +78,13 @@ private:
 };
 
 std::string LogLevelToString(LogLevel level);
+
 LogLevel StringToLogLevel(const std::string &log_level);
 
 class LogEvent {
 public:
-  LogEvent(LogLevel level) : m_level(level){};
+  LogEvent(LogLevel level) : m_level(level) {}
+
   std::string getFileName() const { return m_file_name; }
 
   LogLevel getLogLevel() const { return m_level; }
@@ -89,10 +92,10 @@ public:
   std::string toString();
 
 private:
-  std::string m_file_name; //文件名
-  int32_t m_file_line;     //行号
-  int32_t m_pid;           //进程号
-  int32_t m_thread_id;     //线程号
+  std::string m_file_name; // 文件名
+  int32_t m_file_line;     // 行号
+  int32_t m_pid;           // 进程号
+  int32_t m_thread_id;     // 线程号
 
   LogLevel m_level; //日志级别
 };

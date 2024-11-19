@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include <tinyxml/tinyxml.h>
 
 namespace rocket {
 
